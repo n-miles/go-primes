@@ -13,7 +13,7 @@ func main() {
     resultChannel := make(chan int)
     go worker(2, int(math.Sqrt(float64(max))), firstChannel, resultChannel)
     
-    endChannel := make(chan int) // this is used as a singnal for when we're done
+    endChannel := make(chan int) // this is used as a signal for when we're done
     go printer(resultChannel, endChannel)  // need a printer goroutine so we don't deadlock
     for i := 2; i <= max; i++ {
         firstChannel <- i;
