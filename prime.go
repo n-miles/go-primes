@@ -17,6 +17,7 @@ func main() {
     max := 10000000
     firstChannel := make(chan int, 100)
     resultChannel := make(chan int, 100)
+    // add the first worker (assume we know 2 is prime)
     go worker(2, int(math.Sqrt(float64(max))), firstChannel, resultChannel)
     // workers feed the printer
     go printer(resultChannel)
@@ -51,7 +52,7 @@ func printer(result <-chan int){
  * a link's channel is closed, it then closes the next channel in the chain. The
  * last one closes printer()'s channel, which triggers the program exit.
  */
-func worker(base, end int, myChannel chan int, resultChannel chan int){
+func worker(base, end int, myChannel <-chan int, resultChannel chan int){
     var nextChannel chan int
     // we only need links up to sqrt(max)
     if base <= end {
