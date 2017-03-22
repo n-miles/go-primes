@@ -18,7 +18,7 @@ func main() {
     for i := 2; i <= max; i++ {
         firstChannel <- i;
     }
-    firstChannel <- -1 // tell the workers we're done
+    close(firstChannel) // tell the workers we're done
     <- endChannel // wait for the printer to signal it's done printing
 }
 
@@ -27,14 +27,10 @@ func main() {
  * signals end
  */
 func printer(result <-chan int, end chan<- int){
-    for {
-        i := <- result
-        if i >= 0 {
-            fmt.Println(i)
-        } else {
-            end <- 0
-        }
+    for i := range result {
+        fmt.Println(i)
     }
+    end <- 0
 }
 
 /*
@@ -58,11 +54,11 @@ func worker(base, end int, myChannel chan int, resultChannel chan int){
     resultChannel <- base
     
     // start receiving numbers to check
-    for {
-        i := <- myChannel
+    for i := range myChannel{
         if i % base != 0 {
             // not divisible by base, so send it on to the next link
             nextChannel <- i
         }
     }
+    close(nextChannel)
 }
