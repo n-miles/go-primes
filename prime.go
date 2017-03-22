@@ -4,6 +4,7 @@ import (
     "fmt"
     "math"
     "sync"
+    "time"
 )
 
 var wg sync.WaitGroup
@@ -12,9 +13,10 @@ var wg sync.WaitGroup
  * Prints out all prime numbers under max, then exits
  */
 func main() {
+    startTime := time.Now()
     max := 10000000
-    firstChannel := make(chan int)
-    resultChannel := make(chan int)
+    firstChannel := make(chan int, 100)
+    resultChannel := make(chan int, 100)
     go worker(2, int(math.Sqrt(float64(max))), firstChannel, resultChannel)
     // workers feed the printer
     go printer(resultChannel)
@@ -26,6 +28,8 @@ func main() {
     close(firstChannel)
     // wait for the printer to finish printing all the numbers
     wg.Wait()
+    timeElapsed := time.Now().Sub(startTime)
+    fmt.Println(timeElapsed)
 }
 
 /*
@@ -52,7 +56,7 @@ func worker(base, end int, myChannel chan int, resultChannel chan int){
     // we only need links up to sqrt(max)
     if base <= end {
         // make the new link
-        nextChannel = make(chan int)
+        nextChannel = make(chan int, 100)
         go worker(<- myChannel, end, nextChannel, resultChannel)
     } else {
         // we're the last link, so send numbers that pass us to resultChannel
